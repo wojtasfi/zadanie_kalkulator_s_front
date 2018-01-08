@@ -53,7 +53,7 @@ export class CalculatorComponent implements OnInit {
   }
 
   private isDailySalaryFormatValid(value) {
-    const regexp = new RegExp('((\\d+)(\\.\\d{1,2}))|\\d+');
+    const regexp = new RegExp('^(((\\d+)(\\.\\d{1,2}))|\\d+)$');
     return regexp.test(value);
   }
 
