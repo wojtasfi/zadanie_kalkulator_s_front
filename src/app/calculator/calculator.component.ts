@@ -4,6 +4,7 @@ import {SalaryRequestDto} from '../shared/SalaryRequestDto.model';
 import {Observable} from 'rxjs/Observable';
 import {catchError} from 'rxjs/operators';
 import {of} from 'rxjs/observable/of';
+import {isUndefined} from 'util';
 
 @Component({
   selector: 'app-calculator',
@@ -29,10 +30,10 @@ export class CalculatorComponent implements OnInit {
   calculateSalary(dailySalary: HTMLInputElement, selectedCountry: HTMLInputElement) {
     this.errorMessage = '';
 
-    if (!this.isDailySalaryFormatValid(dailySalary.value)) {
-      this.errorMessage = 'Daily Gross Salary format is invalid';
+    if (!this.validateInput(dailySalary, selectedCountry)) {
       return;
     }
+
     const salaryRequestDto = new SalaryRequestDto(
       selectedCountry.value,
       dailySalary.value
@@ -50,6 +51,19 @@ export class CalculatorComponent implements OnInit {
 
     observable.subscribe(value => this.salary = value);
 
+  }
+
+  private validateInput(dailySalary: HTMLInputElement, selectedCountry: HTMLInputElement) {
+    if (!this.isDailySalaryFormatValid(dailySalary.value)) {
+      this.errorMessage = 'Daily Gross Salary format is invalid';
+      return false;
+    }
+    const cmbValue = this.countryCodes.find(value => value === selectedCountry.value);
+    if (isUndefined(cmbValue) || cmbValue === null) {
+      this.errorMessage = 'Pick the country';
+      return false;
+    }
+    return true;
   }
 
   private isDailySalaryFormatValid(value) {
