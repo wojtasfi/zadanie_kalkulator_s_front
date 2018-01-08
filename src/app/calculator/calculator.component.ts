@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {SalaryRequestDto} from '../shared/SalaryRequestDto.model';
 import {Observable} from 'rxjs/Observable';
 import {catchError} from 'rxjs/operators';
@@ -16,6 +16,7 @@ export class CalculatorComponent implements OnInit {
   calculatorUrl = 'http://localhost:8080/calculator/';
   salary = 0;
   errorMessage = '';
+  currencyCode = '';
 
   constructor(private http: HttpClient) {
 
@@ -65,6 +66,17 @@ export class CalculatorComponent implements OnInit {
     observable.subscribe(value => this.countryCodes = value);
   }
 
+  updateCurrencyCode(countryCode: HTMLInputElement) {
+    const params = new HttpParams().set('countryCode', countryCode.value);
+
+    this.http.get(this.calculatorUrl + 'currencyCode', {
+      responseType: 'text', params: params
+    })
+      .pipe(
+        catchError(this.handleError('currencyCode', ''))
+      ).subscribe(value => this.currencyCode = value);
+  }
+
   private handleError<T>(operationType, safeResult: T) {
     return (error: any): Observable<T> => {
       console.error(error);
@@ -78,9 +90,9 @@ export class CalculatorComponent implements OnInit {
       this.errorMessage = 'Could not calculate salary.';
     } else if (operationType === 'countries') {
       this.errorMessage = 'Could not get countries codes.';
+    } else if (operationType === 'currencyCode') {
+      this.errorMessage = 'Could not get currency code.';
     }
-    console.log('error');
-
   }
 
   private checkIfErrorOccured(): boolean {
@@ -89,4 +101,6 @@ export class CalculatorComponent implements OnInit {
     }
     return false;
   }
+
+
 }
