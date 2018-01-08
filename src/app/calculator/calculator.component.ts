@@ -2,21 +2,27 @@ import {Component, OnInit} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {SalaryRequestDto} from '../shared/SalaryRequestDto.model';
 import {Observable} from 'rxjs/Observable';
+import {catchError} from 'rxjs/operators';
+import {of} from 'rxjs/observable/of';
 
 @Component({
   selector: 'app-calculator',
-  templateUrl: './calculator.component.html'
+  templateUrl: './calculator.component.html',
+  styleUrls: ['./calculator.component.css']
 })
 export class CalculatorComponent implements OnInit {
 
-  countryCodes: String[] = ['US', 'DE'];
+  countryCodes: String[];
   calculatorUrl = 'http://localhost:8080/calculator/';
   salary = 0;
+  errorMessage = '';
 
   constructor(private http: HttpClient) {
+
   }
 
   ngOnInit() {
+    this.fillCountryCombobox();
   }
 
   calculateSalary(dailySalary: HTMLInputElement, selectedCountry: HTMLInputElement) {
@@ -27,16 +33,50 @@ export class CalculatorComponent implements OnInit {
     );
     const httpOptions = {
       headers: new HttpHeaders({
-        'Content-Type': 'application/json',
-        'Origin': 'http://localhost:8080'
+        'Content-Type': 'application/json'
       })
     };
     const observable: Observable<number> =
       this.http.post<number>(this.calculatorUrl + 'calculateSalary',
-        salaryRequestDto, httpOptions);
+        salaryRequestDto, httpOptions).pipe(
+        catchError(this.handleError('calculateSalary', 0))
+      );
 
     observable.subscribe(value => this.salary = value);
 
   }
 
+  private fillCountryCombobox() {
+    const observable: Observable<String[]> =
+      this.http.get<String[]>(this.calculatorUrl + 'countries').pipe(
+        catchError(this.handleError('countries', []))
+      );
+
+    observable.subscribe(value => this.countryCodes = value);
+  }
+
+  private handleError<T>(operationType, safeResult: T) {
+    return (error: any): Observable<T> => {
+      console.error(error);
+      this.setErrorMessage(operationType);
+      return of(safeResult as T);
+    };
+  }
+
+  private setErrorMessage(operationType: string) {
+    if (operationType === 'calculateSalary') {
+      this.errorMessage = 'Could not calculate salary.';
+    } else if (operationType === 'countries') {
+      this.errorMessage = 'Could not get countries codes.';
+    }
+    console.log('error');
+
+  }
+
+  private checkIfErrorOccured(): boolean {
+    if (this.errorMessage !== '') {
+      return true;
+    }
+    return false;
+  }
 }

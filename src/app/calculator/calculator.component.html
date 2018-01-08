@@ -1,5 +1,5 @@
 <div class="container">
-  <div class="row">
+  <div class="row bottom-buffer">
     <div class="col-xs-6 col-md-2">
       <label for="daily">Daily Gross Salary</label>
       <input #dailySalary type="text" id="daily" class="form-control">
@@ -10,12 +10,24 @@
         <option *ngFor="let c of countryCodes">{{c}}</option>
       </select>
     </div>
-    <div class="col-xs-6 col-md-2">
+  </div>
+
+  <div class="row bottom-buffer">
+    <div class="col-xs-12">
       <button class="btn btn-primary" (click)="calculateSalary(dailySalary, selectedCountry)">Calculate</button>
     </div>
-    <div class="col-xs-6 col-md-2">
-      <p>Calculated salary: {{salary}} PLN</p>
-    </div>
+  </div>
 
+  <div class="row bottom-buffer">
+    <div class="col-xs-12">
+      <p>Net month salary: {{salary}} PLN</p>
+    </div>
+  </div>
+  <div *ngIf="checkIfErrorOccured()" class="row">
+    <div class="col-xs-12">
+      <div class="alert alert-danger">
+        <strong>Error!</strong> {{errorMessage}}
+      </div>
+    </div>
   </div>
 </div>
