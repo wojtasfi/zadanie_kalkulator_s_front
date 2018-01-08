@@ -1,0 +1,21 @@
+<div class="container">
+  <div class="row">
+    <div class="col-xs-6 col-md-2">
+      <label for="daily">Daily Gross Salary</label>
+      <input #dailySalary type="text" id="daily" class="form-control">
+    </div>
+    <div class="col-xs-3 col-md-1">
+      <label for="country">Country</label>
+      <select #selectedCountry id="country" class="form-control">
+        <option *ngFor="let c of countryCodes">{{c}}</option>
+      </select>
+    </div>
+    <div class="col-xs-6 col-md-2">
+      <button class="btn btn-primary" (click)="calculateSalary(dailySalary, selectedCountry)">Calculate</button>
+    </div>
+    <div class="col-xs-6 col-md-2">
+      <p>Calculated salary: {{salary}} PLN</p>
+    </div>
+
+  </div>
+</div>
