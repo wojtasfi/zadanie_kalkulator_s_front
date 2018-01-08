@@ -26,7 +26,12 @@ export class CalculatorComponent implements OnInit {
   }
 
   calculateSalary(dailySalary: HTMLInputElement, selectedCountry: HTMLInputElement) {
+    this.errorMessage = '';
 
+    if (!this.isDailySalaryFormatValid(dailySalary.value)) {
+      this.errorMessage = 'Daily Gross Salary format is invalid';
+      return;
+    }
     const salaryRequestDto = new SalaryRequestDto(
       selectedCountry.value,
       dailySalary.value
@@ -44,6 +49,11 @@ export class CalculatorComponent implements OnInit {
 
     observable.subscribe(value => this.salary = value);
 
+  }
+
+  private isDailySalaryFormatValid(value) {
+    const regexp = new RegExp('((\\d+)(\\.\\d{1,2}))|\\d+');
+    return regexp.test(value);
   }
 
   private fillCountryCombobox() {
