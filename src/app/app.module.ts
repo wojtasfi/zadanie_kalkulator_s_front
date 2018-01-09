@@ -7,6 +7,7 @@ import {HeaderComponent} from './header/header.component';
 import {CalculatorComponent} from './calculator/calculator.component';
 import {FormsModule} from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
+import {RestService} from './rest/rest.service';
 
 
 @NgModule({
@@ -20,7 +21,7 @@ import {HttpClientModule} from '@angular/common/http';
     FormsModule,
     HttpClientModule
   ],
-  providers: [],
+  providers: [RestService],
   bootstrap: [AppComponent]
 })
 export class AppModule {

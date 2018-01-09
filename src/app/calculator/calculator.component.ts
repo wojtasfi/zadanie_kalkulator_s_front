@@ -1,10 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {SalaryRequestDto} from '../shared/SalaryRequestDto.model';
-import {Observable} from 'rxjs/Observable';
-import {catchError} from 'rxjs/operators';
-import {of} from 'rxjs/observable/of';
 import {isUndefined} from 'util';
+import {RestService} from '../rest/rest.service';
 
 @Component({
   selector: 'app-calculator',
@@ -14,12 +11,11 @@ import {isUndefined} from 'util';
 export class CalculatorComponent implements OnInit {
 
   countryCodes: String[];
-  calculatorUrl = 'http://localhost:8080/calculator/';
   salary = 0;
   errorMessage = '';
   currencyCode = '';
 
-  constructor(private http: HttpClient) {
+  constructor(private restService: RestService) {
 
   }
 
@@ -38,18 +34,16 @@ export class CalculatorComponent implements OnInit {
       selectedCountry.value,
       dailySalary.value
     );
-    const httpOptions = {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    };
-    const observable: Observable<number> =
-      this.http.post<number>(this.calculatorUrl + 'calculateSalary',
-        salaryRequestDto, httpOptions).pipe(
-        catchError(this.handleError('calculateSalary', 0))
-      );
 
-    observable.subscribe(value => this.salary = value);
+    this.restService.calculateSalary(salaryRequestDto)
+      .subscribe(
+        value => {
+          this.salary = value;
+        },
+        error => {
+          this.setErrorMessage('calculateSalary');
+        }
+      );
 
   }
 
@@ -58,7 +52,12 @@ export class CalculatorComponent implements OnInit {
       this.errorMessage = 'Daily Gross Salary format is invalid';
       return false;
     }
+    if (this.countryCodes === undefined) {
+      this.errorMessage = 'Pick the country';
+      return false;
+    }
     const cmbValue = this.countryCodes.find(value => value === selectedCountry.value);
+    console.log(selectedCountry);
     if (isUndefined(cmbValue) || cmbValue === null) {
       this.errorMessage = 'Pick the country';
       return false;
@@ -72,31 +71,24 @@ export class CalculatorComponent implements OnInit {
   }
 
   private fillCountryCombobox() {
-    const observable: Observable<String[]> =
-      this.http.get<String[]>(this.calculatorUrl + 'countries').pipe(
-        catchError(this.handleError('countries', []))
-      );
 
-    observable.subscribe(value => this.countryCodes = value);
+    this.restService.getCountryCodes()
+      .subscribe(value => {
+          this.countryCodes = value;
+        },
+        error => {
+          this.setErrorMessage('countries');
+        });
   }
 
   updateCurrencyCode(countryCode: HTMLInputElement) {
-    const params = new HttpParams().set('countryCode', countryCode.value);
-
-    this.http.get(this.calculatorUrl + 'currencyCode', {
-      responseType: 'text', params: params
-    })
-      .pipe(
-        catchError(this.handleError('currencyCode', ''))
-      ).subscribe(value => this.currencyCode = value);
-  }
-
-  private handleError<T>(operationType, safeResult: T) {
-    return (error: any): Observable<T> => {
-      console.error(error);
-      this.setErrorMessage(operationType);
-      return of(safeResult as T);
-    };
+    this.restService.getCurrencyCode(countryCode.value)
+      .subscribe(value => {
+          this.currencyCode = value;
+        },
+        error => {
+          this.setErrorMessage('currencyCode');
+        });
   }
 
   private setErrorMessage(operationType: string) {
